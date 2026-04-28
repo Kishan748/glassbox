@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { RunDetail } from "./RunDetail";
@@ -34,7 +35,10 @@ const events: EventNode[] = [
     error_message: null,
     file_path: "app.py",
     line_number: 10,
-    data: {},
+    data: {
+      args: ["local AI traces"],
+      return_value: "Explain why local AI traces help debugging."
+    },
     children: [
       {
         id: "evt_ai",
@@ -48,7 +52,7 @@ const events: EventNode[] = [
         error_message: null,
         file_path: null,
         line_number: null,
-        data: {},
+        data: { provider: "openai", model: "gpt-4o-mini" },
         children: []
       }
     ]
@@ -83,7 +87,32 @@ describe("RunDetail", () => {
     expect(screen.getByText("2 steps")).toBeInTheDocument();
     expect(screen.getByText("Steps")).toBeInTheDocument();
     expect(screen.getByText("main")).toBeInTheDocument();
-    expect(screen.getByText("openai.chat.completions.create")).toBeInTheDocument();
+    expect(screen.getAllByText("openai.chat.completions.create").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("AI call").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("selects a function event and shows its captured data", async () => {
+    render(<RunDetail run={run} events={events} aiCalls={aiCalls} />);
+
+    await userEvent.click(screen.getByRole("button", { name: /Function main failed 2.00s/i }));
+
+    expect(screen.getByRole("heading", { name: "Event detail" })).toBeInTheDocument();
+    expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("app.py:10")).toBeInTheDocument();
+    expect(screen.getByText(/local AI traces/)).toBeInTheDocument();
+    expect(screen.getByText(/Explain why local AI traces help debugging/)).toBeInTheDocument();
+  });
+
+  it("selects an AI event and shows its prompt and response", async () => {
+    render(<RunDetail run={run} events={events} aiCalls={aiCalls} />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /AI call openai.chat.completions.create completed 250 ms/i })
+    );
+
+    expect(screen.getByRole("heading", { name: "Event detail" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AI call" })).toBeInTheDocument();
+    expect(screen.getAllByText(/Prompt/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/Response/).length).toBeGreaterThanOrEqual(1);
   });
 });

@@ -11,6 +11,8 @@ versioning once public releases begin.
 
 - Added `glassbox demo` to create a deterministic local sample run with fake AI
   prompt and response data for first-run viewer testing.
+- Added selectable viewer event rows with an event detail panel for captured
+  data, source location, errors, and AI-call prompts/responses.
 - Added context manager support for `glassbox.init()` so short scripts can mark
   runs completed or failed without an explicit `context.close()`.
 

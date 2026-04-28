@@ -1,4 +1,5 @@
-import { Clock3, DollarSign, GitBranch, Hash } from "lucide-react";
+import { useState } from "react";
+import { Clock3, DollarSign, GitBranch, Hash, ListTree } from "lucide-react";
 
 import type { AiCall, EventNode, RunSummary } from "../api/types";
 import { countEvents, formatCost, formatDuration } from "../utils/format";
@@ -13,7 +14,11 @@ interface RunDetailProps {
 
 export function RunDetail({ run, events, aiCalls = [] }: RunDetailProps) {
   const allEvents = flattenEvents(events);
-  const selectedAiEvent = allEvents.find((event) => event.event_type === "ai_call");
+  const defaultEvent = allEvents.find((event) => event.event_type === "ai_call") ?? allEvents[0];
+  const [selectedEventId, setSelectedEventId] = useState<string | undefined>();
+  const selectedEvent =
+    allEvents.find((event) => event.id === selectedEventId) ?? defaultEvent ?? null;
+  const selectedAiEvent = selectedEvent?.event_type === "ai_call" ? selectedEvent : null;
   const selectedAiCall =
     selectedAiEvent?.ai_call ?? aiCalls.find((aiCall) => aiCall.event_id === selectedAiEvent?.id);
   const failedEvent = allEvents.find((event) => event.status === "failed" && event.error_message);
@@ -44,18 +49,65 @@ export function RunDetail({ run, events, aiCalls = [] }: RunDetailProps) {
         ) : (
           <ol className="event-tree">
             {events.map((event) => (
-              <EventTreeItem key={event.id} event={event} />
+              <EventTreeItem
+                key={event.id}
+                event={event}
+                selectedEventId={selectedEvent?.id}
+                onSelectEvent={setSelectedEventId}
+              />
             ))}
           </ol>
         )}
       </section>
 
       <div className="detail-grid">
+        {selectedEvent && <EventDetail event={selectedEvent} />}
         {selectedAiCall && (
           <AiCallDetail aiCall={selectedAiCall} durationMs={selectedAiEvent?.duration_ms ?? null} />
         )}
         {failedEvent && <ErrorDetail event={failedEvent} runId={run.id} />}
       </div>
+    </section>
+  );
+}
+
+function EventDetail({ event }: { event: EventNode }) {
+  const source = event.file_path
+    ? `${event.file_path}${event.line_number === null ? "" : `:${event.line_number}`}`
+    : "Not captured";
+  const data = JSON.stringify(event.data ?? {}, null, 2);
+
+  return (
+    <section className="detail-panel">
+      <div className="section-title">
+        <ListTree aria-hidden="true" size={18} />
+        <h3>Event detail</h3>
+      </div>
+      <dl className="meta-grid">
+        <div>
+          <dt>Name</dt>
+          <dd>{event.name}</dd>
+        </div>
+        <div>
+          <dt>Type</dt>
+          <dd>{labelForEvent(event.event_type)}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{event.status}</dd>
+        </div>
+        <div>
+          <dt>Duration</dt>
+          <dd>{formatDuration(event.duration_ms)}</dd>
+        </div>
+        <div>
+          <dt>Source</dt>
+          <dd>{source}</dd>
+        </div>
+      </dl>
+      {event.error_message && <pre className="code-block error-message">{event.error_message}</pre>}
+      <h4>Captured data</h4>
+      <pre className="code-block">{data}</pre>
     </section>
   );
 }
@@ -72,19 +124,41 @@ function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; 
   );
 }
 
-function EventTreeItem({ event }: { event: EventNode }) {
+function EventTreeItem({
+  event,
+  selectedEventId,
+  onSelectEvent
+}: {
+  event: EventNode;
+  selectedEventId: string | undefined;
+  onSelectEvent: (eventId: string) => void;
+}) {
+  const eventLabel = labelForEvent(event.event_type);
+  const duration = formatDuration(event.duration_ms);
+
   return (
     <li>
-      <div className={`event-row ${event.status}`}>
-        <span className="event-type">{labelForEvent(event.event_type)}</span>
+      <button
+        aria-pressed={event.id === selectedEventId}
+        className={`event-row ${event.status} ${event.id === selectedEventId ? "selected" : ""}`}
+        onClick={() => onSelectEvent(event.id)}
+        type="button"
+        aria-label={`${eventLabel} ${event.name} ${event.status} ${duration}`}
+      >
+        <span className="event-type">{eventLabel}</span>
         <strong>{event.name}</strong>
         <span>{event.status}</span>
-        <span>{formatDuration(event.duration_ms)}</span>
-      </div>
+        <span>{duration}</span>
+      </button>
       {event.children.length > 0 && (
         <ol>
           {event.children.map((child) => (
-            <EventTreeItem key={child.id} event={child} />
+            <EventTreeItem
+              key={child.id}
+              event={child}
+              selectedEventId={selectedEventId}
+              onSelectEvent={onSelectEvent}
+            />
           ))}
         </ol>
       )}

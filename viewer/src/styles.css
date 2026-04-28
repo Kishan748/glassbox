@@ -265,16 +265,32 @@ dt {
   background: #f8faf8;
   border: 1px solid #e1e8e2;
   border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
   display: grid;
   gap: 10px;
   grid-template-columns: 84px minmax(0, 1fr) 92px 80px;
   min-height: 44px;
   padding: 9px 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.event-row:hover,
+.event-row.selected {
+  border-color: #4f8f73;
+  background: #eef7f2;
 }
 
 .event-row.failed {
   border-color: #efc3c3;
   background: #fff7f7;
+}
+
+.event-row.failed:hover,
+.event-row.failed.selected {
+  border-color: #d47676;
+  background: #fff0f0;
 }
 
 .event-type {

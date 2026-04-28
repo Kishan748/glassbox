@@ -4,7 +4,7 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 0: professional project setup.
+This repository is in Phase 1: SQLite storage core.
 
 ## Development Quickstart
 
@@ -13,6 +13,9 @@ python3 -m pip install -e .
 python3 -m glassbox --help
 pytest
 ```
+
+Phase 1 includes the internal SQLite schema and storage layer used by later
+runtime capture, CLI, and viewer features.
 
 ## Principles
 

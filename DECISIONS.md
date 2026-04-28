@@ -19,3 +19,10 @@ Map features are deferred to V2.
 The initial CLI uses `argparse` from the Python standard library to keep the
 foundation dependency-light. A richer CLI framework can be considered later if
 the command surface grows enough to justify it.
+
+## 2026-04-28: Use Idempotent SQLite Schema Migrations
+
+The local event store is created through an explicit schema migration function
+with a `schema_version` table. Phase 1 starts at schema version 1 and treats the
+SQLite schema as the contract between storage, capture, CLI, backend, and
+viewer code.

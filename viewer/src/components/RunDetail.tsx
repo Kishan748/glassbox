@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock3, DollarSign, GitBranch, Hash, ListTree } from "lucide-react";
+import { Clipboard, Clock3, DollarSign, GitBranch, Hash, ListTree } from "lucide-react";
 
 import type { AiCall, EventNode, RunSummary } from "../api/types";
 import { countEvents, formatCost, formatDuration } from "../utils/format";
@@ -61,7 +61,7 @@ export function RunDetail({ run, events, aiCalls = [] }: RunDetailProps) {
       </section>
 
       <div className="detail-grid">
-        {selectedEvent && <EventDetail event={selectedEvent} />}
+        {selectedEvent && <EventDetail event={selectedEvent} run={run} aiCall={selectedAiCall} />}
         {selectedAiCall && (
           <AiCallDetail aiCall={selectedAiCall} durationMs={selectedAiEvent?.duration_ms ?? null} />
         )}
@@ -71,17 +71,36 @@ export function RunDetail({ run, events, aiCalls = [] }: RunDetailProps) {
   );
 }
 
-function EventDetail({ event }: { event: EventNode }) {
+function EventDetail({
+  event,
+  run,
+  aiCall
+}: {
+  event: EventNode;
+  run: RunSummary;
+  aiCall?: AiCall | null;
+}) {
   const source = event.file_path
     ? `${event.file_path}${event.line_number === null ? "" : `:${event.line_number}`}`
     : "Not captured";
   const data = JSON.stringify(event.data ?? {}, null, 2);
+  const debugPrompt = buildDebugPrompt({ event, run, source, data, aiCall });
 
   return (
     <section className="detail-panel">
-      <div className="section-title">
-        <ListTree aria-hidden="true" size={18} />
-        <h3>Event detail</h3>
+      <div className="copy-row event-detail-title">
+        <div className="section-title">
+          <ListTree aria-hidden="true" size={18} />
+          <h3>Event detail</h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => copyText(debugPrompt)}
+          aria-label="Copy debug prompt"
+        >
+          <Clipboard aria-hidden="true" size={16} />
+          Copy debug prompt
+        </button>
       </div>
       <dl className="meta-grid">
         <div>
@@ -110,6 +129,52 @@ function EventDetail({ event }: { event: EventNode }) {
       <pre className="code-block">{data}</pre>
     </section>
   );
+}
+
+function buildDebugPrompt({
+  event,
+  run,
+  source,
+  data,
+  aiCall
+}: {
+  event: EventNode;
+  run: RunSummary;
+  source: string;
+  data: string;
+  aiCall?: AiCall | null;
+}): string {
+  const lines = [
+    "Debug this Glassbox event.",
+    "",
+    `Run: ${run.id}`,
+    `Project: ${run.project_name}`,
+    `Run status: ${run.status}`,
+    `Event: ${event.name}`,
+    `Event type: ${labelForEvent(event.event_type)}`,
+    `Event status: ${event.status}`,
+    `Duration: ${formatDuration(event.duration_ms)}`,
+    `Source: ${source}`,
+  ];
+
+  if (event.error_message) {
+    lines.push("", "Error:", event.error_message);
+  }
+
+  lines.push("", "Captured data:", data);
+
+  if (aiCall) {
+    lines.push(
+      "",
+      "AI call:",
+      `Provider: ${aiCall.provider}`,
+      `Model: ${aiCall.model}`,
+      `Prompt messages: ${JSON.stringify(aiCall.messages, null, 2)}`,
+      `Response: ${aiCall.response_text ?? "No response text captured."}`,
+    );
+  }
+
+  return lines.join("\n");
 }
 
 function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -178,4 +243,8 @@ function labelForEvent(eventType: string): string {
 
 function flattenEvents(events: EventNode[]): EventNode[] {
   return events.flatMap((event) => [event, ...flattenEvents(event.children)]);
+}
+
+function copyText(text: string) {
+  return navigator.clipboard?.writeText(text);
 }

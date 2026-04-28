@@ -326,6 +326,10 @@ dd {
   margin-top: 14px;
 }
 
+.event-detail-title {
+  margin-top: 0;
+}
+
 .copy-row button,
 .primary-action {
   align-items: center;

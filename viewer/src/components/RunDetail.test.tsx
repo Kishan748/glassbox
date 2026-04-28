@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { RunDetail } from "./RunDetail";
 import type { AiCall, EventNode, RunSummary } from "../api/types";
@@ -114,5 +114,40 @@ describe("RunDetail", () => {
     expect(screen.getByRole("heading", { name: "AI call" })).toBeInTheDocument();
     expect(screen.getAllByText(/Prompt/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText(/Response/).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("copies a debugging prompt for the selected event", async () => {
+    const writeText = vi.fn();
+    Object.assign(navigator, { clipboard: { writeText } });
+    render(<RunDetail run={run} events={events} aiCalls={aiCalls} />);
+
+    await userEvent.click(screen.getByRole("button", { name: /Function main failed 2.00s/i }));
+    await userEvent.click(screen.getByRole("button", { name: "Copy debug prompt" }));
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    const prompt = writeText.mock.calls[0][0] as string;
+    expect(prompt).toContain("Debug this Glassbox event.");
+    expect(prompt).toContain("Run: run_1");
+    expect(prompt).toContain("Project: Demo");
+    expect(prompt).toContain("Event: main");
+    expect(prompt).toContain("Source: app.py:10");
+    expect(prompt).toContain("local AI traces");
+  });
+
+  it("includes AI call prompt and response in the copied debugging prompt", async () => {
+    const writeText = vi.fn();
+    Object.assign(navigator, { clipboard: { writeText } });
+    render(<RunDetail run={run} events={events} aiCalls={aiCalls} />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /AI call openai.chat.completions.create completed 250 ms/i })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Copy debug prompt" }));
+
+    const prompt = writeText.mock.calls[0][0] as string;
+    expect(prompt).toContain("AI call:");
+    expect(prompt).toContain("Provider: openai");
+    expect(prompt).toContain('"content": "Prompt"');
+    expect(prompt).toContain("Response");
   });
 });

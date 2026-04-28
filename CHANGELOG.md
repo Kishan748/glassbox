@@ -15,3 +15,4 @@ versioning once public releases begin.
 - Added SQLite storage, runtime tracking, redaction, AI SDK capture, CLI run
   inspection/export, FastAPI viewer backend, and Vite React viewer frontend.
 - Added `glassbox view` to serve the packaged viewer and local API.
+- Added tracked, OpenAI, and Anthropic examples plus dogfooding notes.

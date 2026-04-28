@@ -4,17 +4,50 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 8: Launchable local viewer.
+This repository is in Phase 9: Examples and dogfooding.
 
-## Development Quickstart
+## Quickstart
 
 ```bash
 python3 -m pip install -e .
-python3 -m glassbox --help
+python3 examples/simple_tracked_app.py
+python3 -m glassbox runs --db glassbox.db
+python3 -m glassbox view --db glassbox.db --port 4747
+```
+
+Then open `http://127.0.0.1:4747/` if your browser did not open automatically.
+
+To instrument your own Python code:
+
+```python
+import glassbox
+
+context = glassbox.init(db_path="glassbox.db", project_name="my-app")
+
+@glassbox.track
+def my_function():
+    return "captured"
+
+try:
+    result = my_function()
+    glassbox.log("thing_happened", {"result": result})
+    glassbox.tag("local")
+finally:
+    context.close()
+```
+
+Useful local commands:
+
+```bash
 python3 -m glassbox doctor
 python3 -m glassbox runs --db glassbox.db
 python3 -m glassbox export --db glassbox.db --run <run_id>
 python3 -m glassbox view --db glassbox.db --port 4747
+```
+
+Development checks:
+
+```bash
 pytest
 cd viewer
 npm install
@@ -22,11 +55,11 @@ npm test
 npm run build
 ```
 
-Phase 8 includes the internal SQLite schema, storage layer, small public
+Phase 9 includes the internal SQLite schema, storage layer, small public
 runtime API, default redaction/truncation, bundled model pricing, opt-in sync
 OpenAI/Anthropic SDK capture, and terminal commands for diagnostics, runs, and
 JSON export. It also includes a FastAPI backend and Vite React frontend for the
-local viewer, plus `glassbox view` to launch it.
+local viewer, `glassbox view` to launch it, and runnable examples.
 
 ## Runtime API
 

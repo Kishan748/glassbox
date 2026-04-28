@@ -74,18 +74,61 @@ export function RunsPage() {
       return <p className="empty-state error-text">{error}</p>;
     }
     if (setupRequired) {
-      return <p className="empty-state">No Glassbox database found. Run an app with Glassbox first.</p>;
+      return (
+        <EmptyState
+          title="No Glassbox database found."
+          body="Create one by running an instrumented app, then reopen the viewer with the same database path."
+          commands={[
+            "python3 examples/simple_tracked_app.py",
+            "python3 -m glassbox view --db glassbox.db --port 4747"
+          ]}
+        />
+      );
+    }
+    if (stats && runs.length === 0) {
+      return (
+        <EmptyState
+          title="No runs found in this database."
+          body="If you expected runs here, check the --db path and make sure your app called glassbox.init()."
+          commands={[
+            "python3 -m glassbox runs --db glassbox.db",
+            "python3 -m glassbox view --db glassbox.db --port 4747"
+          ]}
+        />
+      );
     }
     if (!selectedRun) {
       return <p className="empty-state">Select a run to inspect its steps.</p>;
     }
     return <RunDetail run={selectedRun} events={events} />;
-  }, [error, events, selectedRun, setupRequired]);
+  }, [error, events, runs.length, selectedRun, setupRequired, stats]);
 
   return (
     <div className="runs-page">
       <RunList runs={runs} selectedRunId={selectedRunId} onSelectRun={setSelectedRunId} />
       <main className="main-panel">{content}</main>
     </div>
+  );
+}
+
+function EmptyState({
+  title,
+  body,
+  commands
+}: {
+  title: string;
+  body: string;
+  commands: string[];
+}) {
+  return (
+    <section className="empty-state empty-state-detail">
+      <h1>{title}</h1>
+      <p>{body}</p>
+      <div className="command-list" aria-label="Suggested commands">
+        {commands.map((command) => (
+          <code key={command}>{command}</code>
+        ))}
+      </div>
+    </section>
   );
 }

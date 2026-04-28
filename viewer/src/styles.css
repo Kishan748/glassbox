@@ -348,6 +348,30 @@ dd {
   padding: 18px;
 }
 
+.empty-state-detail {
+  display: grid;
+  gap: 12px;
+}
+
+.empty-state-detail h1 {
+  font-size: 22px;
+}
+
+.command-list {
+  display: grid;
+  gap: 8px;
+}
+
+.command-list code {
+  background: #101814;
+  border-radius: 6px;
+  color: #e8efe9;
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px;
+}
+
 .error-text {
   color: #9d2f2f;
 }

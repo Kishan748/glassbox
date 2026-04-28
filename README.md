@@ -4,7 +4,7 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 10: V1 alpha release gate.
+This repository is in post-alpha polish after `v0.1.0-alpha.1`.
 
 ## Quickstart
 
@@ -22,18 +22,14 @@ To instrument your own Python code:
 ```python
 import glassbox
 
-context = glassbox.init(db_path="glassbox.db", project_name="my-app")
-
 @glassbox.track
 def my_function():
     return "captured"
 
-try:
+with glassbox.init(db_path="glassbox.db", project_name="my-app"):
     result = my_function()
     glassbox.log("thing_happened", {"result": result})
     glassbox.tag("local")
-finally:
-    context.close()
 ```
 
 Useful local commands:
@@ -55,7 +51,7 @@ npm test
 npm run build
 ```
 
-Phase 9 includes the internal SQLite schema, storage layer, small public
+V1 alpha includes the internal SQLite schema, storage layer, small public
 runtime API, default redaction/truncation, bundled model pricing, opt-in sync
 OpenAI/Anthropic SDK capture, and terminal commands for diagnostics, runs, and
 JSON export. It also includes a FastAPI backend and Vite React frontend for the
@@ -66,20 +62,33 @@ local viewer, `glassbox view` to launch it, and runnable examples.
 ```python
 import glassbox
 
-glassbox.init()
-
 @glassbox.track
 def my_function():
     return "captured"
 
-glassbox.log("thing_happened", {"count": 3})
-glassbox.tag("experiment-a")
+with glassbox.init():
+    glassbox.log("thing_happened", {"count": 3})
+    glassbox.tag("experiment-a")
+    my_function()
 ```
 
-AI SDK capture is opt-in:
+Tracked functions are normal Python events. They can contain prompt-like return
+values, but they are not model calls. To see real prompt/response details in
+the AI-call panel, enable SDK capture and run an OpenAI or Anthropic request.
+
+AI SDK capture is opt-in and sync-only in the alpha:
 
 ```python
-glassbox.init(capture_openai=True, capture_anthropic=True)
+import glassbox
+from openai import OpenAI
+
+client = OpenAI()
+
+with glassbox.init(capture_openai=True):
+    client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Explain Glassbox in one sentence."}],
+    )
 ```
 
 ## Viewer Frontend

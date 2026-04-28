@@ -18,19 +18,18 @@ def main() -> int:
         return 0
 
     db_path = Path("glassbox.db")
-    context = glassbox.init(
+    try:
+        from openai import OpenAI
+    except ImportError:
+        print("The OpenAI SDK is not installed.")
+        print("Install it with: python3 -m pip install openai")
+        return 1
+
+    with glassbox.init(
         db_path=db_path,
         project_name="simple-openai-app",
         capture_openai=True,
-    )
-    try:
-        try:
-            from openai import OpenAI
-        except ImportError:
-            print("The OpenAI SDK is not installed.")
-            print("Install it with: python3 -m pip install openai")
-            return 1
-
+    ):
         client = OpenAI()
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -43,8 +42,6 @@ def main() -> int:
             max_tokens=80,
         )
         print(response.choices[0].message.content)
-    finally:
-        context.close()
 
     print(f"Recorded run in {db_path}")
     print("Inspect it with:")

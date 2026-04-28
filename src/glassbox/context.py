@@ -34,6 +34,21 @@ class RuntimeContext:
             return None
         return stack[-1]
 
+    def __enter__(self) -> RuntimeContext:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        exc_traceback: TracebackType | None,
+    ) -> bool:
+        if exc_type is None:
+            self.close()
+        else:
+            self.fail()
+        return False
+
     def close(self) -> None:
         if self._closed:
             return

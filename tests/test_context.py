@@ -47,6 +47,28 @@ def test_context_close_completes_run(temp_db_path) -> None:
     assert run["ended_at"] is not None
 
 
+def test_context_manager_completes_run_on_success(temp_db_path) -> None:
+    with glassbox.init(db_path=temp_db_path, project_name="demo-app") as context:
+        run_id = context.run_id
+
+    run = context.storage.get_run(run_id)
+    assert run["status"] == "completed"
+    assert run["ended_at"] is not None
+
+
+def test_context_manager_marks_run_failed_on_exception(temp_db_path) -> None:
+    try:
+        with glassbox.init(db_path=temp_db_path, project_name="demo-app") as context:
+            run_id = context.run_id
+            raise RuntimeError("boom")
+    except RuntimeError:
+        pass
+
+    run = context.storage.get_run(run_id)
+    assert run["status"] == "failed"
+    assert run["ended_at"] is not None
+
+
 def test_excepthook_marks_active_run_failed(temp_db_path, monkeypatch) -> None:
     context = glassbox.init(db_path=temp_db_path, project_name="demo-app")
     monkeypatch.setattr(runtime_context, "_previous_excepthook", lambda *_args: None)

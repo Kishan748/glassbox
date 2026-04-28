@@ -21,14 +21,11 @@ def score_candidate(prompt: str) -> dict[str, int | str]:
 
 def main() -> int:
     db_path = Path("glassbox.db")
-    context = glassbox.init(db_path=db_path, project_name="simple-tracked-app")
-    try:
+    with glassbox.init(db_path=db_path, project_name="simple-tracked-app"):
         glassbox.tag("example")
         prompt = build_prompt("local AI app debugging")
         candidate = score_candidate(prompt)
         glassbox.log("candidate_scored", candidate)
-    finally:
-        context.close()
 
     print(f"Recorded run in {db_path}")
     print("Inspect it with:")

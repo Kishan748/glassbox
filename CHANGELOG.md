@@ -7,6 +7,18 @@ versioning once public releases begin.
 
 ## Unreleased
 
+### Added
+
+- Added context manager support for `glassbox.init()` so short scripts can mark
+  runs completed or failed without an explicit `context.close()`.
+
+### Changed
+
+- Improved viewer empty states for missing databases and empty or wrong
+  database paths.
+- Clarified README guidance for tracked function data versus real AI-call
+  prompt and response capture.
+
 ## 0.1.0-alpha.1 - 2026-04-28
 
 ### Added

@@ -18,19 +18,18 @@ def main() -> int:
         return 0
 
     db_path = Path("glassbox.db")
-    context = glassbox.init(
+    try:
+        from anthropic import Anthropic
+    except ImportError:
+        print("The Anthropic SDK is not installed.")
+        print("Install it with: python3 -m pip install anthropic")
+        return 1
+
+    with glassbox.init(
         db_path=db_path,
         project_name="simple-anthropic-app",
         capture_anthropic=True,
-    )
-    try:
-        try:
-            from anthropic import Anthropic
-        except ImportError:
-            print("The Anthropic SDK is not installed.")
-            print("Install it with: python3 -m pip install anthropic")
-            return 1
-
+    ):
         client = Anthropic()
         response = client.messages.create(
             model="claude-haiku-4-5",
@@ -43,8 +42,6 @@ def main() -> int:
             ],
         )
         print(response.content[0].text)
-    finally:
-        context.close()
 
     print(f"Recorded run in {db_path}")
     print("Inspect it with:")

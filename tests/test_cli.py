@@ -92,6 +92,7 @@ def test_export_prints_json_for_run_and_events(capsys, temp_db_path) -> None:
 def test_view_starts_local_server_and_opens_browser(monkeypatch, temp_db_path) -> None:
     opened_urls: list[str] = []
     server_calls: list[dict] = []
+    port = _unused_port()
 
     monkeypatch.setattr(cli.webbrowser, "open", lambda url: opened_urls.append(url))
     monkeypatch.setattr(
@@ -102,12 +103,12 @@ def test_view_starts_local_server_and_opens_browser(monkeypatch, temp_db_path) -
         )),
     )
 
-    result = main(["view", "--db", str(temp_db_path), "--port", "4747"])
+    result = main(["view", "--db", str(temp_db_path), "--port", str(port)])
 
     assert result == 0
-    assert opened_urls == ["http://127.0.0.1:4747/"]
+    assert opened_urls == [f"http://127.0.0.1:{port}/"]
     assert server_calls[0]["host"] == "127.0.0.1"
-    assert server_calls[0]["port"] == 4747
+    assert server_calls[0]["port"] == port
 
 
 def test_view_explains_when_port_is_busy(capsys, temp_db_path) -> None:
@@ -122,3 +123,9 @@ def test_view_explains_when_port_is_busy(capsys, temp_db_path) -> None:
     assert result == 1
     assert f"Port {port} is already in use" in captured.err
     assert "--port" in captured.err
+
+
+def _unused_port() -> int:
+    with socket.socket() as available_socket:
+        available_socket.bind(("127.0.0.1", 0))
+        return int(available_socket.getsockname()[1])

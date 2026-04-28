@@ -4,7 +4,7 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 9: Examples and dogfooding.
+This repository is in Phase 10: V1 alpha release gate.
 
 ## Quickstart
 

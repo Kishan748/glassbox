@@ -99,7 +99,7 @@ def test_openai_capture_can_be_disabled(monkeypatch, temp_db_path) -> None:
 def test_glassbox_imports_when_openai_package_is_missing() -> None:
     import glassbox as imported_glassbox
 
-    assert imported_glassbox.__version__ == "0.0.0"
+    assert imported_glassbox.init is not None
 
 
 def _install_fake_openai_module(monkeypatch, completions_class: type) -> None:

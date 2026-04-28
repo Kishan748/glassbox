@@ -7,6 +7,8 @@ versioning once public releases begin.
 
 ## Unreleased
 
+## 0.1.0-alpha.1 - 2026-04-28
+
 ### Added
 
 - Created the initial project foundation for Glassbox V1.

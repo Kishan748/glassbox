@@ -7,7 +7,7 @@ from pathlib import Path
 from glassbox.context import RuntimeContext, init_context, log, tag
 from glassbox.decorators import track
 
-__version__ = "0.0.0"
+__version__ = "0.1.0a1"
 
 
 def init(

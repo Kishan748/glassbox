@@ -96,7 +96,7 @@ def test_anthropic_capture_can_be_disabled(monkeypatch, temp_db_path) -> None:
 def test_glassbox_imports_when_anthropic_package_is_missing() -> None:
     import glassbox as imported_glassbox
 
-    assert imported_glassbox.__version__ == "0.0.0"
+    assert imported_glassbox.init is not None
 
 
 def _install_fake_anthropic_module(monkeypatch, messages_class: type) -> None:

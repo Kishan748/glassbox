@@ -140,6 +140,21 @@ test("keeps long step names readable in the desktop inspector", async ({ page })
   expect(metaBox!.x + metaBox!.width).toBeLessThanOrEqual(rowBox!.x + rowBox!.width);
 });
 
+test("does not create horizontal overflow at medium desktop widths", async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await mockRunApi(page);
+
+  await page.goto("/#runs");
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  const runtimeBox = await page.getByText("Runtime").locator("..").boundingBox();
+  const viewportWidth = page.viewportSize()!.width;
+
+  expect(overflow).toBeLessThanOrEqual(1);
+  expect(runtimeBox).not.toBeNull();
+  expect(runtimeBox!.x + runtimeBox!.width).toBeLessThanOrEqual(viewportWidth);
+});
+
 async function mockRunApi(page: Page) {
   await page.route("**/api/stats", (route) =>
     route.fulfill({ json: { setup_required: false, run_count: 1, event_count: 2, ai_call_count: 1 } })

@@ -22,6 +22,8 @@ versioning once public releases begin.
 
 ### Changed
 
+- Polished viewer run detail layout to reduce horizontal overflow, wrap metric
+  cards, and keep inspector actions compact.
 - Tightened viewer step rows so long event names truncate cleanly beside status
   and duration metadata.
 - Moved viewer event details into a desktop right-side inspector and added

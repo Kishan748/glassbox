@@ -65,7 +65,7 @@ button {
 
 .runs-page {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   min-width: 0;
 }
 
@@ -84,6 +84,14 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.run-detail-header {
+  min-width: 0;
+}
+
+.run-detail-header > div {
+  min-width: 0;
 }
 
 .section-title {
@@ -159,6 +167,12 @@ dt {
   font-size: 12px;
 }
 
+.eyebrow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .run-list-copy span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -190,12 +204,14 @@ dt {
   display: grid;
   gap: 20px;
   max-width: 1180px;
+  min-width: 0;
 }
 
 .status-pill {
   border-radius: 999px;
   background: #eef1ef;
   color: #435248;
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 700;
   padding: 7px 10px;
@@ -214,7 +230,7 @@ dt {
 .metric-grid {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .metric {
@@ -225,6 +241,7 @@ dt {
   display: flex;
   gap: 10px;
   min-height: 72px;
+  min-width: 0;
   padding: 14px;
 }
 
@@ -235,6 +252,11 @@ dt {
 .metric span:last-child {
   display: grid;
   gap: 4px;
+  min-width: 0;
+}
+
+.metric strong {
+  overflow-wrap: anywhere;
 }
 
 .steps-panel,
@@ -249,7 +271,8 @@ dt {
   align-items: start;
   display: grid;
   gap: 16px;
-  grid-template-columns: minmax(300px, 0.95fr) minmax(320px, 1.25fr);
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+  min-width: 0;
 }
 
 .event-tree,
@@ -340,8 +363,9 @@ dt {
 .detail-grid {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   max-height: calc(100vh - 48px);
+  min-width: 0;
   overflow: auto;
   position: sticky;
   top: 24px;
@@ -370,6 +394,7 @@ dd {
 
 .event-detail-title {
   margin-top: 0;
+  flex-wrap: wrap;
 }
 
 .copy-row button,
@@ -381,9 +406,10 @@ dd {
   color: #ffffff;
   cursor: pointer;
   display: inline-flex;
+  font-size: 13px;
   gap: 8px;
-  min-height: 34px;
-  padding: 8px 10px;
+  min-height: 32px;
+  padding: 7px 10px;
 }
 
 .code-block {
@@ -394,6 +420,7 @@ dd {
   line-height: 1.5;
   margin: 10px 0 0;
   max-height: 260px;
+  max-width: 100%;
   overflow: auto;
   padding: 12px;
   white-space: pre-wrap;
@@ -438,6 +465,18 @@ dd {
   color: #9d2f2f;
 }
 
+@media (max-width: 1200px) {
+  .run-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+}
+
 @media (max-width: 900px) {
   .app-shell,
   .runs-page {
@@ -460,15 +499,6 @@ dd {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .run-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-grid {
-    max-height: none;
-    overflow: visible;
-    position: static;
-  }
 }
 
 @media (max-width: 560px) {

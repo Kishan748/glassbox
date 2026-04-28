@@ -90,6 +90,22 @@ class Storage:
         run["tags"] = self._from_json(run["tags"], default=[])
         return run
 
+    def list_runs(self, *, limit: int = 20) -> list[dict[str, Any]]:
+        rows = self._connection.execute(
+            """
+            SELECT * FROM runs
+            ORDER BY started_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        runs = []
+        for row in rows:
+            run = dict(row)
+            run["tags"] = self._from_json(run["tags"], default=[])
+            runs.append(run)
+        return runs
+
     def insert_event(
         self,
         run_id: str,
@@ -246,6 +262,24 @@ class Storage:
         ai_call = dict(row)
         ai_call["messages"] = self._from_json(ai_call.pop("messages_json"), default=[])
         return ai_call
+
+    def list_ai_calls_for_run(self, run_id: str) -> list[dict[str, Any]]:
+        rows = self._connection.execute(
+            """
+            SELECT ai_calls.*
+            FROM ai_calls
+            INNER JOIN events ON events.id = ai_calls.event_id
+            WHERE events.run_id = ?
+            ORDER BY events.started_at, events.id
+            """,
+            (run_id,),
+        ).fetchall()
+        ai_calls = []
+        for row in rows:
+            ai_call = dict(row)
+            ai_call["messages"] = self._from_json(ai_call.pop("messages_json"), default=[])
+            ai_calls.append(ai_call)
+        return ai_calls
 
     def _finish_run(
         self,

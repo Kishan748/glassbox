@@ -46,3 +46,9 @@ Phase 4 installs OpenAI and Anthropic sync capture adapters only when
 `glassbox.init(capture_openai=True, capture_anthropic=True)` requests them.
 This keeps imports graceful when SDKs are missing and avoids surprising method
 patching for users who only want tracked functions and custom logs.
+
+## 2026-04-28: Keep CLI Export As Plain JSON
+
+Phase 5 exports a run as deterministic JSON containing the run, events, and AI
+call rows. This keeps the first export format scriptable and easy to inspect
+before the browser viewer exists.

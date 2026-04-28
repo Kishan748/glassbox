@@ -4,19 +4,23 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 4: AI SDK capture.
+This repository is in Phase 5: CLI runs and export.
 
 ## Development Quickstart
 
 ```bash
 python3 -m pip install -e .
 python3 -m glassbox --help
+python3 -m glassbox doctor
+python3 -m glassbox runs --db glassbox.db
+python3 -m glassbox export --db glassbox.db --run <run_id>
 pytest
 ```
 
-Phase 4 includes the internal SQLite schema, storage layer, small public
-runtime API, default redaction/truncation, bundled model pricing, and opt-in
-sync OpenAI/Anthropic SDK capture.
+Phase 5 includes the internal SQLite schema, storage layer, small public
+runtime API, default redaction/truncation, bundled model pricing, opt-in sync
+OpenAI/Anthropic SDK capture, and terminal commands for diagnostics, runs, and
+JSON export.
 
 ## Runtime API
 

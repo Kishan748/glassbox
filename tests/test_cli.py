@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import socket
+from types import SimpleNamespace
 
 import pytest
 
+import glassbox.cli as cli
 from glassbox.cli import main
 from glassbox.storage import Storage
 
@@ -84,3 +87,38 @@ def test_export_prints_json_for_run_and_events(capsys, temp_db_path) -> None:
     assert exported["run"]["id"] == run_id
     assert exported["events"][0]["id"] == event_id
     assert exported["events"][0]["data"] == {"count": 3}
+
+
+def test_view_starts_local_server_and_opens_browser(monkeypatch, temp_db_path) -> None:
+    opened_urls: list[str] = []
+    server_calls: list[dict] = []
+
+    monkeypatch.setattr(cli.webbrowser, "open", lambda url: opened_urls.append(url))
+    monkeypatch.setattr(
+        cli,
+        "uvicorn",
+        SimpleNamespace(run=lambda app, host, port, log_level: server_calls.append(
+            {"app": app, "host": host, "port": port, "log_level": log_level}
+        )),
+    )
+
+    result = main(["view", "--db", str(temp_db_path), "--port", "4747"])
+
+    assert result == 0
+    assert opened_urls == ["http://127.0.0.1:4747/"]
+    assert server_calls[0]["host"] == "127.0.0.1"
+    assert server_calls[0]["port"] == 4747
+
+
+def test_view_explains_when_port_is_busy(capsys, temp_db_path) -> None:
+    with socket.socket() as busy_socket:
+        busy_socket.bind(("127.0.0.1", 0))
+        busy_socket.listen()
+        port = busy_socket.getsockname()[1]
+
+        result = main(["view", "--db", str(temp_db_path), "--port", str(port)])
+
+    captured = capsys.readouterr()
+    assert result == 1
+    assert f"Port {port} is already in use" in captured.err
+    assert "--port" in captured.err

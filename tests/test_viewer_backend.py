@@ -111,6 +111,29 @@ def test_missing_run_returns_404_with_useful_message(temp_db_path) -> None:
     assert response.json()["detail"] == "Run not found: missing"
 
 
+def test_viewer_static_assets_are_served(tmp_path, temp_db_path) -> None:
+    static_dir = tmp_path / "static"
+    assets_dir = static_dir / "assets"
+    assets_dir.mkdir(parents=True)
+    (static_dir / "index.html").write_text(
+        '<div id="root"></div><script src="/assets/app.js"></script>',
+        encoding="utf-8",
+    )
+    (assets_dir / "app.js").write_text("console.log('glassbox')", encoding="utf-8")
+    client = TestClient(create_app(db_path=temp_db_path, static_dir=static_dir))
+
+    index_response = client.get("/")
+    asset_response = client.get("/assets/app.js")
+    frontend_route_response = client.get("/runs")
+
+    assert index_response.status_code == 200
+    assert '<div id="root"></div>' in index_response.text
+    assert asset_response.status_code == 200
+    assert "console.log" in asset_response.text
+    assert frontend_route_response.status_code == 200
+    assert '<div id="root"></div>' in frontend_route_response.text
+
+
 def _create_run_with_events(temp_db_path):
     storage = Storage(temp_db_path)
     run_id = storage.create_run(project_name="demo-app")

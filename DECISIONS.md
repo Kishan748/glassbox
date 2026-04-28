@@ -64,3 +64,9 @@ databases return a setup state instead of creating hidden state.
 Phase 7 uses a Vite React TypeScript app for the browser viewer. The frontend
 stays as a separate `viewer/` build until Phase 8 wires `glassbox view` and
 static asset serving into the Python package.
+
+## 2026-04-28: Package Built Viewer Assets Inside Glassbox
+
+Phase 8 builds the Vite viewer into `src/glassbox/viewer_static` and serves it
+from the FastAPI app. This keeps `glassbox view` local and dependency-light for
+users at runtime: no separate Node process is required after packaging.

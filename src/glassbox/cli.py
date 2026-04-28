@@ -5,11 +5,16 @@ from __future__ import annotations
 import argparse
 import json
 import platform
+import socket
 import sys
+import webbrowser
 from importlib import metadata, util
 from pathlib import Path
 
+import uvicorn
+
 from glassbox.storage import Storage
+from glassbox.viewer_backend import create_app
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -38,6 +43,12 @@ def build_parser() -> argparse.ArgumentParser:
     export.add_argument("--db", default="glassbox.db", help="Path to the Glassbox SQLite DB.")
     export.add_argument("--run", required=True, help="Run ID to export.")
     export.set_defaults(func=run_export)
+
+    view = subparsers.add_parser("view", help="Start the local Glassbox viewer.")
+    view.add_argument("--db", default="glassbox.db", help="Path to the Glassbox SQLite DB.")
+    view.add_argument("--host", default="127.0.0.1", help="Host interface to bind.")
+    view.add_argument("--port", type=int, default=4747, help="Port for the local viewer.")
+    view.set_defaults(func=run_view)
 
     return parser
 
@@ -109,8 +120,30 @@ def run_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_view(args: argparse.Namespace) -> int:
+    if not _port_available(args.host, args.port):
+        print(
+            f"Port {args.port} is already in use. Choose another port with --port.",
+            file=sys.stderr,
+        )
+        return 1
+
+    app = create_app(db_path=args.db)
+    url = f"http://{args.host}:{args.port}/"
+    print(f"Starting Glassbox viewer at {url}")
+    webbrowser.open(url)
+    uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+    return 0
+
+
 def _sdk_status(package_name: str) -> str:
     return "available" if util.find_spec(package_name) is not None else "not installed"
+
+
+def _port_available(host: str, port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return probe.connect_ex((host, port)) != 0
 
 
 def main(argv: list[str] | None = None) -> int:

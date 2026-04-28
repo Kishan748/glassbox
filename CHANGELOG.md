@@ -14,3 +14,4 @@ versioning once public releases begin.
 - Added minimal Python package, CLI entry point, tests, and CI configuration.
 - Added SQLite storage, runtime tracking, redaction, AI SDK capture, CLI run
   inspection/export, FastAPI viewer backend, and Vite React viewer frontend.
+- Added `glassbox view` to serve the packaged viewer and local API.

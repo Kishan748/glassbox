@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
   "fastapi>=0.115",
+  "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
@@ -39,7 +40,7 @@ glassbox = "glassbox.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-glassbox = ["pricing.json"]
+glassbox = ["pricing.json", "viewer_static/*", "viewer_static/assets/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

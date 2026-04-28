@@ -4,7 +4,7 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 7: Viewer frontend.
+This repository is in Phase 8: Launchable local viewer.
 
 ## Development Quickstart
 
@@ -14,6 +14,7 @@ python3 -m glassbox --help
 python3 -m glassbox doctor
 python3 -m glassbox runs --db glassbox.db
 python3 -m glassbox export --db glassbox.db --run <run_id>
+python3 -m glassbox view --db glassbox.db --port 4747
 pytest
 cd viewer
 npm install
@@ -21,11 +22,11 @@ npm test
 npm run build
 ```
 
-Phase 7 includes the internal SQLite schema, storage layer, small public
+Phase 8 includes the internal SQLite schema, storage layer, small public
 runtime API, default redaction/truncation, bundled model pricing, opt-in sync
 OpenAI/Anthropic SDK capture, and terminal commands for diagnostics, runs, and
 JSON export. It also includes a FastAPI backend and Vite React frontend for the
-future local viewer.
+local viewer, plus `glassbox view` to launch it.
 
 ## Runtime API
 
@@ -57,7 +58,11 @@ npm run dev
 ```
 
 The frontend expects the Phase 6 API shape under `/api`. The CLI command that
-serves the built viewer and starts the backend lands in Phase 8.
+serves the built viewer and starts the backend is:
+
+```bash
+python3 -m glassbox view --db glassbox.db --port 4747
+```
 
 Glassbox stores local runtime data in SQLite. Captured function arguments and
 return values are redacted and truncated by default, but prompts, responses,

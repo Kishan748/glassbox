@@ -6,12 +6,21 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from glassbox.storage import Storage
 
 
-def create_app(*, db_path: str | Path = "glassbox.db") -> FastAPI:
+def create_app(
+    *,
+    db_path: str | Path = "glassbox.db",
+    static_dir: str | Path | None = None,
+) -> FastAPI:
     db = Path(db_path)
+    static_path = (
+        Path(static_dir) if static_dir is not None else Path(__file__).parent / "viewer_static"
+    )
     app = FastAPI(title="Glassbox Viewer API")
 
     @app.get("/api/stats")
@@ -62,6 +71,7 @@ def create_app(*, db_path: str | Path = "glassbox.db") -> FastAPI:
         finally:
             storage.close()
 
+    _mount_viewer_assets(app, static_path)
     return app
 
 
@@ -105,3 +115,23 @@ def _build_event_tree(
         else:
             roots.append(event)
     return roots
+
+
+def _mount_viewer_assets(app: FastAPI, static_path: Path) -> None:
+    index_path = static_path / "index.html"
+    assets_path = static_path / "assets"
+    if not index_path.exists():
+        return
+
+    if assets_path.exists():
+        app.mount("/assets", StaticFiles(directory=assets_path), name="viewer-assets")
+
+    @app.get("/", include_in_schema=False)
+    def viewer_index() -> FileResponse:
+        return FileResponse(index_path)
+
+    @app.get("/{frontend_path:path}", include_in_schema=False)
+    def viewer_route(frontend_path: str) -> FileResponse:
+        if frontend_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        return FileResponse(index_path)

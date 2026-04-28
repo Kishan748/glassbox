@@ -1,0 +1,10 @@
+{
+  "gpt-4o-mini": {
+    "input_per_1m": 0.15,
+    "output_per_1m": 0.60
+  },
+  "claude-3-5-haiku-latest": {
+    "input_per_1m": 0.80,
+    "output_per_1m": 4.00
+  }
+}

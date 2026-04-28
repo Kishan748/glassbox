@@ -108,19 +108,34 @@ def init_context(
     *,
     db_path: str | Path = "glassbox.db",
     project_name: str | None = None,
+    capture_openai: bool = False,
+    capture_anthropic: bool = False,
 ) -> RuntimeContext:
     global _current_context
 
     if _current_context is not None and _current_context.is_active:
         return _current_context
 
-    config = build_config(db_path=db_path, project_name=project_name)
+    config = build_config(
+        db_path=db_path,
+        project_name=project_name,
+        capture_openai=capture_openai,
+        capture_anthropic=capture_anthropic,
+    )
     storage = Storage(config.db_path)
     run_id = storage.create_run(
         project_name=config.project_name,
         cwd=str(Path.cwd()),
     )
     _current_context = RuntimeContext(config=config, storage=storage, run_id=run_id)
+    if config.capture_openai:
+        from glassbox.capture.openai import install_capture as install_openai_capture
+
+        install_openai_capture()
+    if config.capture_anthropic:
+        from glassbox.capture.anthropic import install_capture as install_anthropic_capture
+
+        install_anthropic_capture()
     atexit.register(_close_current_context)
     _install_excepthook()
     return _current_context

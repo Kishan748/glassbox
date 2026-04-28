@@ -39,3 +39,10 @@ Phase 3 applies redaction and truncation before captured function arguments,
 keyword arguments, and return values are written into SQLite. The first pass
 uses deterministic local rules for common API-key patterns and secret-like
 mapping keys rather than making any network calls or inference requests.
+
+## 2026-04-28: Make AI SDK Capture Explicitly Opt-In
+
+Phase 4 installs OpenAI and Anthropic sync capture adapters only when
+`glassbox.init(capture_openai=True, capture_anthropic=True)` requests them.
+This keeps imports graceful when SDKs are missing and avoids surprising method
+patching for users who only want tracked functions and custom logs.

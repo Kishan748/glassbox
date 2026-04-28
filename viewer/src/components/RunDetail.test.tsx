@@ -150,4 +150,41 @@ describe("RunDetail", () => {
     expect(prompt).toContain('"content": "Prompt"');
     expect(prompt).toContain("Response");
   });
+
+  it("scrolls selected event details into view on mobile", async () => {
+    const scrollIntoView = vi.fn();
+    const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView;
+    const originalMatchMedia = window.matchMedia;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: vi.fn().mockReturnValue({ matches: true })
+    });
+    Object.defineProperty(window, "requestAnimationFrame", {
+      configurable: true,
+      value: (callback: FrameRequestCallback) => {
+        callback(0);
+        return 0;
+      }
+    });
+
+    try {
+      render(<RunDetail run={run} events={events} aiCalls={aiCalls} />);
+
+      await userEvent.click(screen.getByRole("button", { name: /Function main failed 2.00s/i }));
+
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
+    } finally {
+      window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+      Object.defineProperty(window, "matchMedia", {
+        configurable: true,
+        value: originalMatchMedia
+      });
+      Object.defineProperty(window, "requestAnimationFrame", {
+        configurable: true,
+        value: originalRequestAnimationFrame
+      });
+    }
+  });
 });

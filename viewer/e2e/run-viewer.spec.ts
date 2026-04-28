@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const run = {
   id: "run_1",
@@ -72,15 +72,7 @@ const events = [
 
 test("loads a run and copies selected event debug context", async ({ context, page }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-
-  await page.route("**/api/stats", (route) =>
-    route.fulfill({ json: { setup_required: false, run_count: 1, event_count: 2, ai_call_count: 1 } })
-  );
-  await page.route("**/api/runs", (route) => route.fulfill({ json: { runs: [run] } }));
-  await page.route("**/api/runs/run_1", (route) => route.fulfill({ json: { run } }));
-  await page.route("**/api/runs/run_1/events", (route) =>
-    route.fulfill({ json: { events } })
-  );
+  await mockRunApi(page);
 
   await page.goto("/#runs");
 
@@ -97,3 +89,30 @@ test("loads a run and copies selected event debug context", async ({ context, pa
   expect(prompt).toContain("Source: app.py:10");
   expect(prompt).toContain("local AI traces");
 });
+
+test("keeps event detail to the right of steps on desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await mockRunApi(page);
+
+  await page.goto("/#runs");
+  await page.getByRole("button", { name: /Function main failed 2.00s/i }).click();
+
+  const stepsBox = await page.locator(".steps-panel").boundingBox();
+  const detailsBox = await page.locator(".detail-grid").boundingBox();
+
+  expect(stepsBox).not.toBeNull();
+  expect(detailsBox).not.toBeNull();
+  expect(detailsBox!.x).toBeGreaterThan(stepsBox!.x + stepsBox!.width - 1);
+  expect(Math.abs(detailsBox!.y - stepsBox!.y)).toBeLessThanOrEqual(4);
+});
+
+async function mockRunApi(page: Page) {
+  await page.route("**/api/stats", (route) =>
+    route.fulfill({ json: { setup_required: false, run_count: 1, event_count: 2, ai_call_count: 1 } })
+  );
+  await page.route("**/api/runs", (route) => route.fulfill({ json: { runs: [run] } }));
+  await page.route("**/api/runs/run_1", (route) => route.fulfill({ json: { run } }));
+  await page.route("**/api/runs/run_1/events", (route) =>
+    route.fulfill({ json: { events } })
+  );
+}

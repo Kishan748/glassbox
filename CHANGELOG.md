@@ -22,6 +22,8 @@ versioning once public releases begin.
 
 ### Changed
 
+- Moved viewer event details into a desktop right-side inspector and added
+  mobile scroll-to-detail behavior after selecting a step.
 - Expanded `glassbox doctor` with database-path and packaged-viewer asset
   sanity checks.
 - Improved viewer empty states for missing databases and empty or wrong

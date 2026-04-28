@@ -245,6 +245,13 @@ dt {
   padding: 16px;
 }
 
+.run-workspace {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(320px, 1.25fr);
+}
+
 .event-tree,
 .event-tree ol {
   display: grid;
@@ -303,6 +310,10 @@ dt {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  position: sticky;
+  top: 24px;
 }
 
 .meta-grid {
@@ -416,6 +427,16 @@ dd {
 
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .run-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
+    max-height: none;
+    overflow: visible;
+    position: static;
   }
 }
 

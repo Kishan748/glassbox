@@ -7,6 +7,8 @@ versioning once public releases begin.
 
 ## Unreleased
 
+## 0.1.0-alpha.3 - 2026-04-29
+
 ### Added
 
 - Added Playwright browser smoke coverage for the viewer run-inspection and
@@ -34,6 +36,12 @@ versioning once public releases begin.
   database paths.
 - Clarified README guidance for tracked function data versus real AI-call
   prompt and response capture.
+
+## 0.1.0-alpha.2 - 2026-04-28
+
+### Changed
+
+- Updated the Anthropic example to use the current `claude-haiku-4-5` model.
 
 ## 0.1.0-alpha.1 - 2026-04-28
 

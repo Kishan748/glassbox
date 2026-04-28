@@ -44,6 +44,10 @@ def build_parser() -> argparse.ArgumentParser:
     export.add_argument("--run", required=True, help="Run ID to export.")
     export.set_defaults(func=run_export)
 
+    demo = subparsers.add_parser("demo", help="Create a local demo run with sample AI data.")
+    demo.add_argument("--db", default="glassbox.db", help="Path to the Glassbox SQLite DB.")
+    demo.set_defaults(func=run_demo)
+
     view = subparsers.add_parser("view", help="Start the local Glassbox viewer.")
     view.add_argument("--db", default="glassbox.db", help="Path to the Glassbox SQLite DB.")
     view.add_argument("--host", default="127.0.0.1", help="Host interface to bind.")
@@ -120,6 +124,19 @@ def run_export(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_demo(args: argparse.Namespace) -> int:
+    storage = Storage(args.db)
+    try:
+        run_id = _create_demo_run(storage)
+    finally:
+        storage.close()
+
+    print(f"Created demo run {run_id} in {Path(args.db)}")
+    print("Inspect it with:")
+    print(f"  python3 -m glassbox view --db {args.db} --port 4747")
+    return 0
+
+
 def run_view(args: argparse.Namespace) -> int:
     if not _port_available(args.host, args.port):
         print(
@@ -144,6 +161,63 @@ def _port_available(host: str, port: int) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
         probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return probe.connect_ex((host, port)) != 0
+
+
+def _create_demo_run(storage: Storage) -> str:
+    run_id = storage.create_run(project_name="glassbox-demo", tags=["demo", "local"])
+    question_event_id = storage.insert_event(
+        run_id,
+        event_type="function",
+        name="draft_question",
+        duration_ms=12,
+        status="completed",
+        data={
+            "args": ["local AI traces"],
+            "return_value": "Explain why local AI traces help debugging.",
+        },
+    )
+    ai_event_id = storage.insert_event(
+        run_id,
+        parent_id=question_event_id,
+        event_type="ai_call",
+        name="glassbox.demo.ai_call",
+        duration_ms=328,
+        status="completed",
+        data={"provider": "demo", "model": "demo-local-model"},
+    )
+    storage.insert_ai_call(
+        ai_event_id,
+        provider="demo",
+        model="demo-local-model",
+        messages=[
+            {
+                "role": "user",
+                "content": "Explain why local AI traces help debugging.",
+            }
+        ],
+        response_text=(
+            "Local AI traces show the exact prompt, response, timing, and surrounding "
+            "function calls, so debugging starts from facts instead of guesses."
+        ),
+        stop_reason="stop",
+        input_tokens=9,
+        output_tokens=24,
+        cost_usd=0.0,
+    )
+    storage.insert_event(
+        run_id,
+        parent_id=question_event_id,
+        event_type="log",
+        name="demo_summary",
+        duration_ms=1,
+        status="completed",
+        data={
+            "message": "This demo run is deterministic and never calls an external model.",
+            "next_step": "Open the viewer and inspect the AI call.",
+        },
+    )
+    storage.complete_run(run_id)
+    return run_id
 
 
 def main(argv: list[str] | None = None) -> int:

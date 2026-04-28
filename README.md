@@ -10,12 +10,15 @@ This repository is in post-alpha polish after `v0.1.0-alpha.1`.
 
 ```bash
 python3 -m pip install -e .
-python3 examples/simple_tracked_app.py
+python3 -m glassbox demo --db glassbox.db
 python3 -m glassbox runs --db glassbox.db
 python3 -m glassbox view --db glassbox.db --port 4747
 ```
 
 Then open `http://127.0.0.1:4747/` if your browser did not open automatically.
+The demo command is fully local and deterministic; it creates a sample run with
+tracked function data, a log event, and a fake AI call so the viewer has prompt
+and response data immediately.
 
 To instrument your own Python code:
 
@@ -36,6 +39,7 @@ Useful local commands:
 
 ```bash
 python3 -m glassbox doctor
+python3 -m glassbox demo --db glassbox.db
 python3 -m glassbox runs --db glassbox.db
 python3 -m glassbox export --db glassbox.db --run <run_id>
 python3 -m glassbox view --db glassbox.db --port 4747

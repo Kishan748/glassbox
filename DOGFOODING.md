@@ -9,11 +9,12 @@
 - `python3 -m glassbox view --db glassbox.db --port 4747` serves the packaged viewer without a separate Node process.
 - Missing API keys for AI examples are handled before SDK imports or network calls.
 - The post-alpha context manager keeps short scripts readable and closes runs automatically.
+- `glassbox demo` gives testers a known-good run with AI-call detail before they instrument anything.
 
 ### What Was Confusing
 
 - AI examples need separate SDK installs, which is reasonable for V1 but needs very plain README guidance.
-- The viewer and CLI both read `glassbox.db`, so examples should always print the exact view command they expect users to run.
+- The viewer and CLI both read `glassbox.db`, so demos and examples should always print the exact view command they expect users to run.
 
 ### Missing V1 Polish
 

@@ -89,6 +89,36 @@ def test_export_prints_json_for_run_and_events(capsys, temp_db_path) -> None:
     assert exported["events"][0]["data"] == {"count": 3}
 
 
+def test_demo_creates_completed_run_with_ai_call(capsys, temp_db_path) -> None:
+    result = main(["demo", "--db", str(temp_db_path)])
+
+    captured = capsys.readouterr()
+    storage = Storage(temp_db_path)
+    try:
+        runs = storage.list_runs()
+        events = storage.list_events(runs[0]["id"])
+        ai_calls = storage.list_ai_calls_for_run(runs[0]["id"])
+    finally:
+        storage.close()
+
+    assert result == 0
+    assert "Created demo run" in captured.out
+    assert "python3 -m glassbox view --db" in captured.out
+    assert len(runs) == 1
+    assert runs[0]["project_name"] == "glassbox-demo"
+    assert runs[0]["status"] == "completed"
+    assert "demo" in runs[0]["tags"]
+    assert {event["name"] for event in events} >= {
+        "draft_question",
+        "glassbox.demo.ai_call",
+        "demo_summary",
+    }
+    assert len(ai_calls) == 1
+    assert ai_calls[0]["provider"] == "demo"
+    assert ai_calls[0]["messages"][0]["content"] == "Explain why local AI traces help debugging."
+    assert ai_calls[0]["response_text"] is not None
+
+
 def test_view_starts_local_server_and_opens_browser(monkeypatch, temp_db_path) -> None:
     opened_urls: list[str] = []
     server_calls: list[dict] = []

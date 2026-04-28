@@ -281,6 +281,16 @@ class Storage:
             ai_calls.append(ai_call)
         return ai_calls
 
+    def get_stats(self) -> dict[str, int]:
+        run_count = self._connection.execute("SELECT COUNT(*) FROM runs").fetchone()[0]
+        event_count = self._connection.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+        ai_call_count = self._connection.execute("SELECT COUNT(*) FROM ai_calls").fetchone()[0]
+        return {
+            "run_count": run_count,
+            "event_count": event_count,
+            "ai_call_count": ai_call_count,
+        }
+
     def _finish_run(
         self,
         run_id: str,

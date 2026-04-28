@@ -22,7 +22,9 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
-dependencies = []
+dependencies = [
+  "fastapi>=0.115",
+]
 
 [project.optional-dependencies]
 dev = [

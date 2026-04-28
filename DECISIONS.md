@@ -52,3 +52,9 @@ patching for users who only want tracked functions and custom logs.
 Phase 5 exports a run as deterministic JSON containing the run, events, and AI
 call rows. This keeps the first export format scriptable and easy to inspect
 before the browser viewer exists.
+
+## 2026-04-28: Expose Viewer Data Through A Small FastAPI App
+
+Phase 6 uses FastAPI for the local viewer backend and keeps API responses close
+to the SQLite contract: runs, event trees, and aggregate stats. Missing
+databases return a setup state instead of creating hidden state.

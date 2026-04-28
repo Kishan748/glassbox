@@ -106,6 +106,40 @@ test("keeps event detail to the right of steps on desktop", async ({ page }) => 
   expect(Math.abs(detailsBox!.y - stepsBox!.y)).toBeLessThanOrEqual(4);
 });
 
+test("keeps long step names readable in the desktop inspector", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await mockRunApi(page);
+
+  await page.goto("/#runs");
+
+  const row = page.getByRole("button", {
+    name: /AI call openai\.chat\.completions\.create completed 250 ms/i
+  });
+  await expect(row.locator(".event-meta")).toBeVisible();
+  const rowBox = await row.boundingBox();
+  const nameBox = await row.locator("strong").boundingBox();
+  const metaBox = await row.locator(".event-meta").boundingBox();
+  const nameStyles = await row.locator("strong").evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+    return {
+      overflow: styles.overflow,
+      textOverflow: styles.textOverflow,
+      whiteSpace: styles.whiteSpace
+    };
+  });
+
+  expect(rowBox).not.toBeNull();
+  expect(nameBox).not.toBeNull();
+  expect(metaBox).not.toBeNull();
+  expect(nameStyles).toEqual({
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  });
+  expect(nameBox!.x + nameBox!.width).toBeLessThanOrEqual(metaBox!.x - 8);
+  expect(metaBox!.x + metaBox!.width).toBeLessThanOrEqual(rowBox!.x + rowBox!.width);
+});
+
 async function mockRunApi(page: Page) {
   await page.route("**/api/stats", (route) =>
     route.fulfill({ json: { setup_required: false, run_count: 1, event_count: 2, ai_call_count: 1 } })

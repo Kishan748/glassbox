@@ -22,6 +22,8 @@ versioning once public releases begin.
 
 ### Changed
 
+- Tightened viewer step rows so long event names truncate cleanly beside status
+  and duration metadata.
 - Moved viewer event details into a desktop right-side inspector and added
   mobile scroll-to-detail behavior after selecting a step.
 - Expanded `glassbox doctor` with database-path and packaged-viewer asset

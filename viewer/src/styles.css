@@ -275,10 +275,13 @@ dt {
   color: inherit;
   cursor: pointer;
   display: grid;
-  gap: 10px;
-  grid-template-columns: 84px minmax(0, 1fr) 92px 80px;
-  min-height: 44px;
-  padding: 9px 10px;
+  gap: 4px 12px;
+  grid-template-areas:
+    "type meta"
+    "name meta";
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 58px;
+  padding: 10px 12px;
   text-align: left;
   width: 100%;
 }
@@ -303,7 +306,35 @@ dt {
 .event-type {
   color: #315f4c;
   font-size: 12px;
+  grid-area: type;
   font-weight: 700;
+}
+
+.event-name {
+  grid-area: name;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-meta {
+  align-self: center;
+  display: grid;
+  gap: 2px;
+  grid-area: meta;
+  justify-items: end;
+  min-width: 78px;
+}
+
+.event-status,
+.event-duration {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.event-duration {
+  color: #4c5f55;
 }
 
 .detail-grid {

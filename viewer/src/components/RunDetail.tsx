@@ -222,9 +222,13 @@ function EventTreeItem({
         aria-label={`${eventLabel} ${event.name} ${event.status} ${duration}`}
       >
         <span className="event-type">{eventLabel}</span>
-        <strong>{event.name}</strong>
-        <span>{event.status}</span>
-        <span>{duration}</span>
+        <strong className="event-name" title={event.name}>
+          {event.name}
+        </strong>
+        <span className="event-meta">
+          <span className="event-status">{event.status}</span>
+          <span className="event-duration">{duration}</span>
+        </span>
       </button>
       {event.children.length > 0 && (
         <ol>

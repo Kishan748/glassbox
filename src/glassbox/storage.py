@@ -75,6 +75,13 @@ class Storage:
     def fail_run(self, run_id: str, *, ended_at: datetime | None = None) -> None:
         self._finish_run(run_id, status="failed", ended_at=ended_at)
 
+    def update_run_tags(self, run_id: str, tags: list[str]) -> None:
+        self._connection.execute(
+            "UPDATE runs SET tags = ? WHERE id = ?",
+            (self._to_json(tags), run_id),
+        )
+        self._connection.commit()
+
     def get_run(self, run_id: str) -> dict[str, Any]:
         row = self._connection.execute("SELECT * FROM runs WHERE id = ?", (run_id,)).fetchone()
         if row is None:
@@ -142,6 +149,41 @@ class Storage:
             (run_id,),
         ).fetchall()
         return [self._event_from_row(row) for row in rows]
+
+    def complete_event(
+        self,
+        event_id: str,
+        *,
+        duration_ms: int,
+        data: dict[str, Any] | None = None,
+    ) -> None:
+        self._connection.execute(
+            """
+            UPDATE events
+            SET duration_ms = ?, status = ?, data_json = ?
+            WHERE id = ?
+            """,
+            (duration_ms, "completed", self._to_json(data), event_id),
+        )
+        self._connection.commit()
+
+    def fail_event(
+        self,
+        event_id: str,
+        *,
+        duration_ms: int,
+        error_message: str,
+        data: dict[str, Any] | None = None,
+    ) -> None:
+        self._connection.execute(
+            """
+            UPDATE events
+            SET duration_ms = ?, status = ?, error_message = ?, data_json = ?
+            WHERE id = ?
+            """,
+            (duration_ms, "failed", error_message, self._to_json(data), event_id),
+        )
+        self._connection.commit()
 
     def insert_ai_call(
         self,

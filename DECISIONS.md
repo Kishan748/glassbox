@@ -26,3 +26,9 @@ The local event store is created through an explicit schema migration function
 with a `schema_version` table. Phase 1 starts at schema version 1 and treats the
 SQLite schema as the contract between storage, capture, CLI, backend, and
 viewer code.
+
+## 2026-04-28: Use A Single Active Runtime Context
+
+Phase 2 uses one active process-local runtime context for `glassbox.init()`.
+Nested tracked function calls use `contextvars` to preserve parent-child event
+relationships without passing context objects through user code.

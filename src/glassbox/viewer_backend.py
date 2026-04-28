@@ -53,7 +53,12 @@ def create_app(*, db_path: str | Path = "glassbox.db") -> FastAPI:
         storage = _storage_or_404(db)
         try:
             _get_run_or_404(storage, run_id)
-            return {"events": _build_event_tree(storage.list_events(run_id))}
+            return {
+                "events": _build_event_tree(
+                    storage.list_events(run_id),
+                    storage.list_ai_calls_for_run(run_id),
+                )
+            }
         finally:
             storage.close()
 
@@ -83,8 +88,15 @@ def _get_run_or_404(storage: Storage, run_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=f"Run not found: {run_id}") from exc
 
 
-def _build_event_tree(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _build_event_tree(
+    events: list[dict[str, Any]],
+    ai_calls: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    ai_calls_by_event_id = {ai_call["event_id"]: ai_call for ai_call in ai_calls or []}
     by_id = {event["id"]: {**event, "children": []} for event in events}
+    for event_id, ai_call in ai_calls_by_event_id.items():
+        if event_id in by_id:
+            by_id[event_id]["ai_call"] = ai_call
     roots = []
     for event in by_id.values():
         parent_id = event["parent_id"]

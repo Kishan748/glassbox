@@ -12,3 +12,5 @@ versioning once public releases begin.
 - Created the initial project foundation for Glassbox V1.
 - Added planning documents for the V1-V3 roadmap and professional V1 build.
 - Added minimal Python package, CLI entry point, tests, and CI configuration.
+- Added SQLite storage, runtime tracking, redaction, AI SDK capture, CLI run
+  inspection/export, FastAPI viewer backend, and Vite React viewer frontend.

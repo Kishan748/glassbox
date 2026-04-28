@@ -56,6 +56,36 @@ def test_run_events_returns_event_tree(temp_db_path) -> None:
     assert events[0]["children"][0]["id"] == child_id
 
 
+def test_run_events_include_ai_call_detail(temp_db_path) -> None:
+    storage = Storage(temp_db_path)
+    run_id = storage.create_run(project_name="demo-app")
+    event_id = storage.insert_event(
+        run_id,
+        event_type="ai_call",
+        name="openai.chat.completions.create",
+        status="completed",
+    )
+    storage.insert_ai_call(
+        event_id,
+        provider="openai",
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello"}],
+        response_text="Hi",
+        input_tokens=10,
+        output_tokens=5,
+        cost_usd=0.001,
+    )
+    storage.close()
+    client = TestClient(create_app(db_path=temp_db_path))
+
+    response = client.get(f"/api/runs/{run_id}/events")
+
+    assert response.status_code == 200
+    event = response.json()["events"][0]
+    assert event["ai_call"]["provider"] == "openai"
+    assert event["ai_call"]["messages"] == [{"role": "user", "content": "Hello"}]
+
+
 def test_missing_database_returns_friendly_setup_state(temp_db_path) -> None:
     client = TestClient(create_app(db_path=temp_db_path))
 

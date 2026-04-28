@@ -58,3 +58,9 @@ before the browser viewer exists.
 Phase 6 uses FastAPI for the local viewer backend and keeps API responses close
 to the SQLite contract: runs, event trees, and aggregate stats. Missing
 databases return a setup state instead of creating hidden state.
+
+## 2026-04-28: Use Vite React For The Local Viewer
+
+Phase 7 uses a Vite React TypeScript app for the browser viewer. The frontend
+stays as a separate `viewer/` build until Phase 8 wires `glassbox view` and
+static asset serving into the Python package.

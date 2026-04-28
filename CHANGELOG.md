@@ -22,6 +22,8 @@ versioning once public releases begin.
 
 ### Changed
 
+- Expanded `glassbox doctor` with database-path and packaged-viewer asset
+  sanity checks.
 - Improved viewer empty states for missing databases and empty or wrong
   database paths.
 - Clarified README guidance for tracked function data versus real AI-call

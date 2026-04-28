@@ -45,6 +45,10 @@ python3 -m glassbox export --db glassbox.db --run <run_id>
 python3 -m glassbox view --db glassbox.db --port 4747
 ```
 
+`glassbox doctor` reports the local Python/runtime environment, whether the
+selected database path exists, whether the packaged viewer assets are available,
+and whether optional OpenAI/Anthropic SDKs are installed.
+
 Development checks:
 
 ```bash

@@ -38,6 +38,8 @@ def test_doctor_outputs_cwd_db_path_and_sdk_availability(capsys, temp_db_path) -
 
     assert result == 0
     assert f"database: {temp_db_path}" in captured.out
+    assert "database status: not found" in captured.out
+    assert "viewer assets: available" in captured.out
     assert "cwd:" in captured.out
     assert "openai sdk:" in captured.out
     assert "anthropic sdk:" in captured.out

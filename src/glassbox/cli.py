@@ -65,13 +65,16 @@ def get_version() -> str:
 
 
 def run_doctor(_args: argparse.Namespace) -> int:
+    db_path = Path(_args.db)
     print("Glassbox diagnostics")
     print(f"  glassbox: {get_version()}")
     print(f"  python: {platform.python_version()}")
     print(f"  executable: {sys.executable}")
     print(f"  platform: {platform.platform()}")
     print(f"  cwd: {Path.cwd()}")
-    print(f"  database: {Path(_args.db)}")
+    print(f"  database: {db_path}")
+    print(f"  database status: {_database_status(db_path)}")
+    print(f"  viewer assets: {_viewer_assets_status()}")
     print(f"  openai sdk: {_sdk_status('openai')}")
     print(f"  anthropic sdk: {_sdk_status('anthropic')}")
     return 0
@@ -155,6 +158,18 @@ def run_view(args: argparse.Namespace) -> int:
 
 def _sdk_status(package_name: str) -> str:
     return "available" if util.find_spec(package_name) is not None else "not installed"
+
+
+def _database_status(db_path: Path) -> str:
+    return "found" if db_path.exists() else "not found"
+
+
+def _viewer_assets_status() -> str:
+    static_path = Path(__file__).parent / "viewer_static"
+    index_path = static_path / "index.html"
+    assets_path = static_path / "assets"
+    has_assets = assets_path.exists() and any(assets_path.iterdir())
+    return "available" if index_path.exists() and has_assets else "missing"
 
 
 def _port_available(host: str, port: int) -> bool:

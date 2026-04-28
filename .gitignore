@@ -15,3 +15,5 @@ glassbox.db
 htmlcov/
 node_modules/
 viewer/dist/
+viewer/playwright-report/
+viewer/test-results/

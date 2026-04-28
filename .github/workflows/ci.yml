@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  python:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,3 +22,32 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest
+
+  viewer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: viewer/package-lock.json
+      - name: Install viewer dependencies
+        working-directory: viewer
+        run: npm ci
+      - name: Lint viewer
+        working-directory: viewer
+        run: npm run lint
+      - name: Test viewer components
+        working-directory: viewer
+        run: npm test
+      - name: Install Playwright browser
+        working-directory: viewer
+        run: npx playwright install --with-deps chromium
+      - name: Test viewer in browser
+        working-directory: viewer
+        run: npm run test:e2e
+      - name: Build viewer
+        working-directory: viewer
+        run: npm run build

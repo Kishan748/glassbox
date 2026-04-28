@@ -9,6 +9,8 @@ versioning once public releases begin.
 
 ### Added
 
+- Added Playwright browser smoke coverage for the viewer run-inspection and
+  copy-debug-prompt path.
 - Added `glassbox demo` to create a deterministic local sample run with fake AI
   prompt and response data for first-run viewer testing.
 - Added copyable selected-event debug prompts for pasting Glassbox context into

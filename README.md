@@ -52,6 +52,7 @@ pytest
 cd viewer
 npm install
 npm test
+npm run test:e2e
 npm run build
 ```
 

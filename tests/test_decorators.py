@@ -33,6 +33,29 @@ def test_track_captures_sync_function_return_and_duration(temp_db_path) -> None:
     assert len(events[0]["data"]["return_value"]) < 800
 
 
+def test_track_redacts_function_args_kwargs_and_return_value(temp_db_path) -> None:
+    context = glassbox.init(db_path=temp_db_path, project_name="demo-app")
+
+    @glassbox.track
+    def handle(payload: dict, *, api_key: str) -> dict:
+        return {"token": api_key, "safe": payload["safe"]}
+
+    handle(
+        {"safe": "visible", "password": "correct-horse-battery-staple"},
+        api_key="sk-proj-abcdefghijklmnopqrstuvwxyz123456",
+    )
+
+    events = context.storage.list_events(context.run_id)
+    assert events[0]["data"]["args"] == [
+        {"safe": "visible", "password": "[REDACTED]"}
+    ]
+    assert events[0]["data"]["kwargs"] == {"api_key": "[REDACTED]"}
+    assert events[0]["data"]["return_value"] == {
+        "token": "[REDACTED]",
+        "safe": "visible",
+    }
+
+
 def test_track_captures_exception_and_reraises(temp_db_path) -> None:
     context = glassbox.init(db_path=temp_db_path, project_name="demo-app")
 

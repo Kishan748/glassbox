@@ -8,12 +8,10 @@ from collections.abc import Callable
 from typing import ParamSpec, TypeVar
 
 from glassbox.context import get_current_context
+from glassbox.redaction import redact_value
 
 P = ParamSpec("P")
 R = TypeVar("R")
-
-MAX_CAPTURE_CHARS = 500
-
 
 def track(func: Callable[P, R]) -> Callable[P, R]:
     """Capture a sync function call when a Glassbox context is active."""
@@ -25,8 +23,8 @@ def track(func: Callable[P, R]) -> Callable[P, R]:
             return func(*args, **kwargs)
 
         data = {
-            "args": [_capture_value(arg) for arg in args],
-            "kwargs": {key: _capture_value(value) for key, value in kwargs.items()},
+            "args": [redact_value(arg) for arg in args],
+            "kwargs": redact_value(kwargs),
         }
         event_id = context.start_event(
             event_type="function",
@@ -48,7 +46,7 @@ def track(func: Callable[P, R]) -> Callable[P, R]:
             raise
         else:
             duration_ms = _duration_ms(started)
-            data["return_value"] = _capture_value(result)
+            data["return_value"] = redact_value(result)
             context.complete_event(event_id, duration_ms=duration_ms, data=data)
             return result
         finally:
@@ -59,10 +57,3 @@ def track(func: Callable[P, R]) -> Callable[P, R]:
 
 def _duration_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
-
-
-def _capture_value(value: object) -> str:
-    captured = repr(value)
-    if len(captured) <= MAX_CAPTURE_CHARS:
-        return captured
-    return f"{captured[:MAX_CAPTURE_CHARS]}..."

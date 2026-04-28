@@ -32,3 +32,10 @@ viewer code.
 Phase 2 uses one active process-local runtime context for `glassbox.init()`.
 Nested tracked function calls use `contextvars` to preserve parent-child event
 relationships without passing context objects through user code.
+
+## 2026-04-28: Redact Before Function Data Reaches Storage
+
+Phase 3 applies redaction and truncation before captured function arguments,
+keyword arguments, and return values are written into SQLite. The first pass
+uses deterministic local rules for common API-key patterns and secret-like
+mapping keys rather than making any network calls or inference requests.

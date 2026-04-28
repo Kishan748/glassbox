@@ -4,7 +4,7 @@ Glassbox is a local flight recorder for Python AI apps. V1 focuses on capturing 
 
 ## Current Status
 
-This repository is in Phase 2: Runtime API.
+This repository is in Phase 3: Redaction and data safety.
 
 ## Development Quickstart
 
@@ -14,8 +14,8 @@ python3 -m glassbox --help
 pytest
 ```
 
-Phase 2 includes the internal SQLite schema, storage layer, and small public
-runtime API used by later AI capture, CLI, and viewer features.
+Phase 3 includes the internal SQLite schema, storage layer, small public
+runtime API, and default redaction/truncation for captured function data.
 
 ## Runtime API
 
@@ -31,6 +31,11 @@ def my_function():
 glassbox.log("thing_happened", {"count": 3})
 glassbox.tag("experiment-a")
 ```
+
+Glassbox stores local runtime data in SQLite. Captured function arguments and
+return values are redacted and truncated by default, but prompts, responses,
+arguments, and errors can still contain sensitive information. Treat
+`glassbox.db` as local application data and review exports before sharing them.
 
 ## Principles
 
